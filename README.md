@@ -18,16 +18,17 @@ pip install netpeakPsel
 To start using the package, you need to initialize the main components:
 
 ```python
-import netpeakPsel
+from netpeakPsel import Crawler, RequestHandler, CacheManager
 
 # Initialize the request handler with a delay (default is 1 second)
-request_handler = netpeakPsel.RequestHandler(delay=1)
+request_handler = RequestHandler(delay=1)
 
 # Initialize the cache manager with the cache file (default is 'cache.txt')
-cache_manager = netpeakPsel.CacheManager(cache_file='cache.txt')
+cache_manager = CacheManager(cache_file='cache.txt')
 
 # Create the Crawler instance with the request handler and cache manager
-crawler = netpeakPsel.Crawler(request_handler, cache_manager)
+crawler = Crawler(request_handler, cache_manager)
+
 ```
 
 ### 2. Parsing a Single URL
@@ -77,10 +78,9 @@ This will create a single CSV file (`sitewide_external_links.csv`) containing ex
 
 These dependencies will be installed automatically when you install the package via `pip`.
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-If you'd like to contribute, feel free to fork the repository and submit a pull request. Please make sure to update tests as appropriate.
+If you'd like to contribute, feel free to fork the repository and submit a pull request. Please make sure to update tests as appropriate. [GitHub Repo](https://github.com/VsevolodKrasovskyi/netpeakPsel/)
+

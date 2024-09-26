@@ -6,20 +6,24 @@ from tqdm import tqdm
 import lxml.etree as ET
 import time
 import os
+from colorama import Fore, Style, init
+
+# Initialize colorama
+init(autoreset=True)
 
 class RequestHandler:
     def __init__(self, delay=1):
         self.delay = delay
 
     def make_request(self, url):
-        """Выполняет HTTP-запрос с задержкой."""
+        """Performs HTTP request with delay."""
         try:
-            time.sleep(self.delay)  # Задержка перед запросом
+            time.sleep(self.delay)  # Delay before request
             response = requests.get(url)
             response.raise_for_status()
             return response
         except requests.exceptions.RequestException as e:
-            print(f"Ошибка при запросе {url}: {e}")
+            print(f"{Fore.RED}Error while requesting {url}: {e}")
             return None
 
 class CacheManager:
@@ -28,24 +32,24 @@ class CacheManager:
         self.cache = self.load_cache()
 
     def load_cache(self):
-        """Загружает кеш из текстового файла."""
+        """Loads cache from a text file."""
         if os.path.exists(self.cache_file):
             with open(self.cache_file, 'r') as f:
                 return set(line.strip() for line in f)
         return set()
 
     def save_cache(self):
-        """Сохраняет обновленный кеш в текстовый файл."""
+        """Saves updated cache to a text file."""
         with open(self.cache_file, 'w') as f:
             for url in self.cache:
                 f.write(f"{url}\n")
 
     def check_cache(self, url):
-        """Проверяет, был ли URL уже обработан."""
+        """Checks if a URL has already been processed."""
         return url in self.cache
 
     def update_cache(self, url):
-        """Добавляет новый URL в кеш."""
+        """Adds a new URL to the cache."""
         self.cache.add(url)
         self.save_cache()
 
@@ -56,17 +60,15 @@ class Crawler:
         self.sitewide_elements = ['header', 'footer', 'nav', 'aside']
 
     def ensure_scheme(self, url):
-        """Добавляет https:// к URL, если схема отсутствует."""
+        """Adds https:// to the URL if the scheme is missing."""
         parsed_url = urlparse(url)
         if not parsed_url.scheme:
-            # Если схема отсутствует, добавляем https://
-            print(f"Invalid URL '{url}': No scheme supplied. Adding https://")
+            print(f"{Fore.RED}Invalid URL '{url}': No scheme supplied. Adding https://")
             return f"https://{url}"
         return url
 
-
     def normalize_domain(self, url):
-        """Нормализует домен, убирая 'www.'."""
+        """Normalizes the domain by removing 'www.' if present."""
         parsed_url = urlparse(url)
         domain = parsed_url.netloc
         if domain.startswith('www.'):
@@ -74,19 +76,19 @@ class Crawler:
         return domain
 
     def is_external_link(self, link, base_url):
-        """Проверяет, является ли ссылка внешней."""
+        """Checks if the link is external compared to the base URL."""
         domain_link = self.normalize_domain(link)
         domain_base = self.normalize_domain(base_url)
         return domain_link != domain_base
 
     def get_xpath(self, element):
-        """Возвращает XPath элемента."""
+        """Returns the XPath of an element."""
         return element.getroottree().getpath(element)
 
     def get_sitewide_external_links(self, url):
-        """Извлекает внешние ссылки из sitewide-элементов."""
+        """Extracts external links from sitewide elements (header, footer, nav, aside)."""
         if self.cache_manager.check_cache(url):
-            print(f"Страница {url} уже в кеше, пропускаем.")
+            print(f"{Fore.WHITE}Page {Fore.YELLOW}{url} {Fore.WHITE}is already cached, skipping.")
             return set()
 
         response = self.request_handler.make_request(url)
@@ -113,53 +115,37 @@ class Crawler:
         return external_links
 
     def parse_url(self, url):
-        """Парсит один URL и сохраняет результат в шаблонизированный CSV файл для каждого домена."""
-        # Нормализуем URL и домен
+        """Parses a single URL and saves the result to a templated CSV file for each domain."""
         url = self.ensure_scheme(url)
         domain = self.normalize_domain(url)
-        
-        # Создаем имя выходного файла для домена
-        output_file = f"{domain}_sitewide_links.csv"
-        
-        print(f"Парсим {url} и сохраняем результат в {output_file}...")
 
-        # Открываем CSV-файл с шаблонизированным именем для этого домена
+        output_file = f"{domain}_sitewide_links.csv"
+        print(f"{Fore.WHITE}Parsing {Fore.YELLOW}{url} {Fore.WHITE}and saving results to {output_file}...")
+
         with open(output_file, 'w', newline='', encoding='utf-8') as file:
             csv_writer = csv.writer(file)
             csv_writer.writerow(['Domain', 'External Link', 'XPath', 'Page URL'])
-            
-            # Извлекаем и записываем внешние ссылки
+
             external_links = self.get_sitewide_external_links(url)
             for link, xpath, page_url in external_links:
                 csv_writer.writerow([url, link, xpath, page_url])
 
-        print(f"Результаты для {url} сохранены в {output_file}")
+        print(f"{Fore.GREEN}Results for {Fore.YELLOW}{url} {Fore.GREEN}saved to {output_file}")
 
-
-
-
-    def parse_list_domain(self, domain_file, output='sitewide_external_links.csv'):
-        """Парсит домены из файла и сохраняет результат в один общий CSV файл."""
-        
+    def parse_list_domain(self, domain_file, output):
+        """Parses domains from a file and saves the result to a single CSV file."""
         with open(domain_file, 'r') as f:
             domains = [line.strip() for line in f]
 
-        # Открытие общего файла для записи
         with open(output, 'w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(['Domain', 'External Link', 'XPath', 'Page URL'])
 
-            # Цикл по доменам с использованием tqdm для отслеживания прогресса
-            for domain in tqdm(domains, desc="Domain Scanning"):
-                print(f"Парсим {domain}...")
-
-                # Здесь вызываем ensure_scheme для каждого домена
+            for domain in tqdm(domains, desc=f"{Fore.CYAN}Scanning domains", bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.YELLOW, Fore.RESET)):
+                print(f"{Fore.WHITE}Parsing {Fore.YELLOW}{domain}{Fore.WHITE}...")
                 domain = self.ensure_scheme(domain)
-                
-                # Извлекаем и записываем данные для каждого домена в общий CSV файл
                 external_links = self.get_sitewide_external_links(domain)
                 for link, xpath, page_url in external_links:
                     writer.writerow([domain, link, xpath, page_url])
 
-        print(f"Все результаты сохранены в {output}")
-
+        print(f"{Fore.GREEN}All results saved to {output}")
