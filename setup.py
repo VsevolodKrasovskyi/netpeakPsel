@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='netpeakPsel',  # Netpeak Parser Sitewide external links
-    version='0.1.0',  # Версия
+    version='0.1.1',  # Version
     description='A tool for parsing external links from specific sections of a website (header, footer, nav, aside).',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
