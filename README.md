@@ -18,7 +18,7 @@ pip install netpeakPsel
 To start using the package, you need to initialize the main components:
 
 ```python
-from netpeakPsel import Crawler, RequestHandler, CacheManager
+from netpeakPsel import *
 
 # Initialize the request handler with a delay (default is 1 second)
 request_handler = RequestHandler(delay=1)

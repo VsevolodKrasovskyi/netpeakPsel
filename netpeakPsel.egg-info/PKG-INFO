@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: netpeakPsel
-Version: 0.1.3
+Version: 0.1.4
 Summary: A tool for parsing external links from specific sections of a website (header, footer, nav, aside).
 Home-page: https://github.com/VsevolodKrasovskyi/netpeakPsel
 Author: Masik
@@ -38,7 +38,7 @@ pip install netpeakPsel
 To start using the package, you need to initialize the main components:
 
 ```python
-from netpeakPsel import Crawler, RequestHandler, CacheManager
+from netpeakPsel import *
 
 # Initialize the request handler with a delay (default is 1 second)
 request_handler = RequestHandler(delay=1)
