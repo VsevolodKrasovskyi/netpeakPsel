@@ -1,4 +1,3 @@
-
 # NetpeakPsel
 
 **NetpeakPsel** is a tool for extracting external links from specific sections of web pages, such as `header`, `footer`, `nav`, and `aside`.
@@ -46,6 +45,7 @@ This will create a CSV file named `example.com_sitewide_links.csv` containing al
 To parse external links from multiple domains listed in a text file:
 
 1. Create a file named `domains.txt` with each domain on a new line:
+   
    ```
    example.com
    anotherdomain.com
@@ -59,6 +59,21 @@ crawler.parse_list_domain('domains.txt', 'sitewide_external_links.csv')
 ```
 
 This will create a single CSV file (`sitewide_external_links.csv`) containing external links from all domains listed in `domains.txt`.
+
+### 4. Full Website Content Parsing
+
+To parse all content from a specific website:
+
+If you've recently migrated your website and want to check if the old domain is still mentioned on other pages, you can use the `ContentParser` to extract any references to the old domain within the content. This method is particularly useful for SEO purposes, ensuring that the old domain is properly redirected or removed from links.
+
+```python
+from netpeakPsel import ContentParser
+
+parser = ContentParser("https://example.com/", "oldwebsite.com", "results.csv")
+parser.crawl()
+```
+
+This will search for mentions of the old domain (e.g., `oldwebsite.com`) across the new website and save the results in a CSV file (`"results.csv"`). The file will contain all pages where the old domain is referenced, making it easier to spot potential issues with outdated links or missed redirects after the site migration.
 
 ## Features
 
@@ -76,7 +91,6 @@ This will create a single CSV file (`sitewide_external_links.csv`) containing ex
   - `lxml`
   - `tqdm`
   - `colorama`
-  
 
 These dependencies will be installed automatically when you install the package via `pip`.
 
@@ -85,4 +99,3 @@ These dependencies will be installed automatically when you install the package 
 ## Contributing
 
 If you'd like to contribute, feel free to fork the repository and submit a pull request. Please make sure to update tests as appropriate. [GitHub Repo](https://github.com/VsevolodKrasovskyi/netpeakPsel/)
-
