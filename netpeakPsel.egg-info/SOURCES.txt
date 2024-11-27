@@ -1,6 +1,7 @@
 README.md
 setup.py
 netpeakPsel/__init__.py
+netpeakPsel/content_parser.py
 netpeakPsel/sitewide.py
 netpeakPsel.egg-info/PKG-INFO
 netpeakPsel.egg-info/SOURCES.txt

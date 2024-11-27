@@ -167,17 +167,30 @@ class Crawler:
         with open(domain_file, 'r') as f:
             domains = [line.strip() for line in f]
 
-        with open(output, 'w', newline='', encoding='utf-8') as file:
+        # Determine if there is at least one domain that has not yet been processed and is not in the cache
+        new_domains_to_process = [
+            domain for domain in domains if not self.cache_manager.check_cache(self.ensure_scheme(domain))
+        ]
+
+        # If there are no new domains, print the message and terminate the function
+        if not new_domains_to_process:
+            print(f"{Fore.GREEN}All domains are already cached. No new domains to process.")
+            return
+
+        # Check if the file with the results exists
+        file_exists = os.path.isfile(output)
+
+        # Open the file for writing, if the file exists, open it in add mode, otherwise in write mode
+        with open(output, 'a' if file_exists else 'w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['Domain', 'External Link', 'XPath', 'Page URL'])
 
-            for domain in tqdm(domains, desc="Scanning domains", bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.YELLOW, Fore.RESET)):
+            # If the file did not exist, record the headers
+            if not file_exists:
+                writer.writerow(['Domain', 'External Link', 'XPath', 'Page URL'])
+
+            # We process only new domains
+            for domain in tqdm(new_domains_to_process, desc="Scanning domains", bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.YELLOW, Fore.RESET)):
                 domain = self.ensure_scheme(domain)
-
-                # Check if the domain is in the cache and skip it if so
-                if self.cache_manager.check_cache(domain):
-                    print(f"{Fore.WHITE}Domain {Fore.YELLOW}{domain} {Fore.WHITE}is already cached, skipping.")
-                    continue
 
                 # Collect external links from the home page
                 external_links = self.get_sitewide_external_links(domain)
@@ -187,12 +200,10 @@ class Crawler:
                 # Looking for a blog page and collecting external links if possible
                 blog_page = self.find_blog_page(domain)
                 if blog_page:
-                    if not self.cache_manager.check_cache(blog_page):
-                        blog_external_links = self.get_sitewide_external_links(blog_page)
-                        for link, xpath, page_url in blog_external_links:
-                            writer.writerow([blog_page, link, xpath, page_url])
-                    else:
-                        print(f"{Fore.WHITE}Blog page {Fore.YELLOW}{blog_page} {Fore.WHITE}is already cached, skipping.")
+                    blog_external_links = self.get_sitewide_external_links(blog_page)
+                    for link, xpath, page_url in blog_external_links:
+                        writer.writerow([blog_page, link, xpath, page_url])
 
-            print(f"{Fore.GREEN}All results saved to {output}")
+        print(f"{Fore.GREEN}New results saved to {output}")
+
 

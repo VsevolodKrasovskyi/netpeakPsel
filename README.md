@@ -60,6 +60,16 @@ crawler.parse_list_domain('domains.txt', 'sitewide_external_links.csv')
 
 This will create a single CSV file (`sitewide_external_links.csv`) containing external links from all domains listed in `domains.txt`.
 
+### 4. Full Website Content Parsing
+To parse all content from a specific website:
+
+```python
+from netpeakPsel import ContentParser
+
+parser = ContentParser("https://galinov.com/", "test.galinov.com", "results.csv")
+parser.crawl()
+```
+
 ## Features
 
 - Extracts external links from the `header`, `footer`, `nav`, and `aside` sections of web pages.
